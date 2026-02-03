@@ -75,6 +75,54 @@ const ValentineProposal = () => {
   };
 
   if (showSuccess) {
+    if (selectedActivity) {
+      return (
+        <div className="min-h-screen w-full flex flex-col items-center justify-center overflow-hidden relative p-4" 
+             style={{ background: 'linear-gradient(135deg, #FFF0F3 0%, #FFCCD5 100%)' }}
+             data-testid="final-screen">
+          <motion.div
+            initial={{ scale: 0, rotate: -180 }}
+            animate={{ scale: 1, rotate: 0 }}
+            transition={{ type: "spring", duration: 0.8 }}
+            className="relative z-10 max-w-2xl w-full text-center p-8 md:p-12"
+          >
+            <motion.div
+              animate={{ scale: [1, 1.2, 1] }}
+              transition={{ duration: 0.5 }}
+              className="text-8xl mb-6"
+            >
+              {selectedActivity.emoji}
+            </motion.div>
+            
+            <h1 className="font-heading text-5xl md:text-6xl font-bold text-valentine-text mb-6" data-testid="final-heading">
+              {selectedActivity.title}!
+            </h1>
+            
+            <p className="font-body text-2xl md:text-3xl text-valentine-text leading-relaxed mb-8" data-testid="final-message">
+              {selectedActivity.response}
+            </p>
+            
+            <div className="flex gap-4 justify-center items-center mb-6">
+              <Heart className="w-8 h-8 text-valentine-primary fill-valentine-primary animate-pulse" />
+              <p className="font-body text-xl text-valentine-accent font-semibold" data-testid="final-tagline">
+                It's a date! Can't wait! 💕
+              </p>
+              <Heart className="w-8 h-8 text-valentine-primary fill-valentine-primary animate-pulse" />
+            </div>
+
+            <motion.img
+              src="https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif"
+              alt="Celebration Dance"
+              className="mt-8 rounded-3xl shadow-2xl max-w-sm mx-auto"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              data-testid="final-gif"
+            />
+          </motion.div>
+        </div>
+      );
+    }
+
     return (
       <div className="min-h-screen w-full flex flex-col items-center justify-center overflow-hidden relative p-4" 
            style={{ background: 'linear-gradient(135deg, #FFF0F3 0%, #FFCCD5 100%)' }}
@@ -101,24 +149,61 @@ const ValentineProposal = () => {
             You never stood a chance against my master plan! 
             Let's make this Valentine's Day legendary! 🎉
           </p>
-          
-          <div className="flex gap-4 justify-center items-center">
-            <Sparkles className="w-8 h-8 text-valentine-accent animate-pulse" />
-            <p className="font-body text-lg text-valentine-accent font-semibold" data-testid="success-tagline">
-              This is just the beginning of our amazing adventure together
-            </p>
-            <Sparkles className="w-8 h-8 text-valentine-accent animate-pulse" />
-          </div>
 
-          <motion.img
-            src="https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif"
-            alt="Celebration Dance"
-            className="mt-8 rounded-3xl shadow-2xl max-w-md mx-auto"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            data-testid="success-image"
-          />
+          {showActivitySelect && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <h2 className="font-heading text-3xl md:text-4xl font-bold text-valentine-text mb-6" data-testid="activity-question">
+                So... what do you wanna do?
+              </h2>
+              
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-3xl mx-auto" data-testid="activity-grid">
+                {activities.map((activity) => (
+                  <motion.button
+                    key={activity.id}
+                    whileHover={{ scale: 1.05, y: -5 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => handleActivitySelect(activity)}
+                    className="p-6 rounded-2xl border-2 font-body font-semibold text-lg shadow-lg hover:shadow-xl transition-all"
+                    style={{ 
+                      background: 'rgba(255, 255, 255, 0.8)',
+                      borderColor: '#FF4D6D',
+                      color: '#590D22'
+                    }}
+                    data-testid={`activity-${activity.id}`}
+                  >
+                    <div className="text-5xl mb-2">{activity.emoji}</div>
+                    <div>{activity.title}</div>
+                  </motion.button>
+                ))}
+              </div>
+            </motion.div>
+          )}
+
+          {!showActivitySelect && (
+            <>
+              <div className="flex gap-4 justify-center items-center">
+                <Sparkles className="w-8 h-8 text-valentine-accent animate-pulse" />
+                <p className="font-body text-lg text-valentine-accent font-semibold" data-testid="success-tagline">
+                  This is just the beginning of our amazing adventure together
+                </p>
+                <Sparkles className="w-8 h-8 text-valentine-accent animate-pulse" />
+              </div>
+
+              <motion.img
+                src="https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif"
+                alt="Celebration Dance"
+                className="mt-8 rounded-3xl shadow-2xl max-w-md mx-auto"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                data-testid="success-image"
+              />
+            </>
+          )}
         </motion.div>
 
         <div className="absolute inset-0 pointer-events-none">
