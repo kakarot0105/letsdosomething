@@ -51,7 +51,7 @@ const ValentineProposal = () => {
       emoji: "🎨", 
       title: "Arts & Crafts", 
       response: "Time to get creative! 🖌️ We're basically Picasso... if Picasso had zero artistic talent but maximum enthusiasm! 😂🎨",
-      gif: "https://media.giphy.com/media/l0HlSz7PKCvrVrAKQ/giphy.gif"
+      gif: "https://media.giphy.com/media/ule4vhcY1xEKQ/giphy.gif"
     },
     { 
       id: 6, 
