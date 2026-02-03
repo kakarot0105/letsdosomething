@@ -18,12 +18,48 @@ const ValentineProposal = () => {
   const [attempts, setAttempts] = useState(0);
 
   const activities = [
-    { id: 1, emoji: "🍽️", title: "Fancy Dinner", response: "Ooh la la! 🥂 Time to put on those fancy pants and pretend we're rich! Just don't judge my table manners 😜" },
-    { id: 2, emoji: "🍿", title: "Movie Marathon", response: "Netflix and actually chill! 🛋️ I promise not to fall asleep... maybe 😴💤" },
-    { id: 3, emoji: "💃", title: "Dance Party", response: "Warning: My dance moves are FIRE! 🔥🕺 (Translation: I have no idea what I'm doing but I'll look confident 😎)" },
-    { id: 4, emoji: "👨‍🍳", title: "Cook Together", response: "Gordon Ramsay is shaking! 👨‍🍳 (Please have the fire extinguisher ready 🧯😂)" },
-    { id: 5, emoji: "🎮", title: "Game Night", response: "Controller ready! 🎮 May the best player win... which will obviously be me! 😏🏆 (But I'll let you win because I love you 🥺)" },
-    { id: 6, emoji: "🌟", title: "Surprise Me!", response: "Buckle up buttercup! 🎢 This is gonna be LEGENDARY! (I have absolutely no plan but we'll figure it out 😂✨)" }
+    { 
+      id: 1, 
+      emoji: "🍽️", 
+      title: "Fancy Dinner", 
+      response: "Ooh la la! 🥂 Time to put on those fancy pants and pretend we're rich! Just don't judge my table manners 😜",
+      gif: "https://media.giphy.com/media/3o7TKqm1mNujcBPSpy/giphy.gif"
+    },
+    { 
+      id: 2, 
+      emoji: "🍿", 
+      title: "Movie Marathon", 
+      response: "Netflix and actually chill! 🛋️ I promise not to fall asleep... maybe 😴💤",
+      gif: "https://media.giphy.com/media/2zelCiUo5KJyN8MgMr/giphy.gif"
+    },
+    { 
+      id: 3, 
+      emoji: "💃", 
+      title: "Dance Party", 
+      response: "Warning: My dance moves are FIRE! 🔥🕺 (Translation: I have no idea what I'm doing but I'll look confident 😎)",
+      gif: "https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif"
+    },
+    { 
+      id: 4, 
+      emoji: "👨‍🍳", 
+      title: "Cook Together", 
+      response: "Gordon Ramsay is shaking! 👨‍🍳 (Please have the fire extinguisher ready 🧯😂)",
+      gif: "https://media.giphy.com/media/xUPGcJGy8I928yIlAQ/giphy.gif"
+    },
+    { 
+      id: 5, 
+      emoji: "🎨", 
+      title: "Arts & Crafts", 
+      response: "Time to get creative! 🖌️ We're basically Picasso... if Picasso had zero artistic talent but maximum enthusiasm! 😂🎨",
+      gif: "https://media.giphy.com/media/l0HlSz7PKCvrVrAKQ/giphy.gif"
+    },
+    { 
+      id: 6, 
+      emoji: "🌟", 
+      title: "Surprise Me!", 
+      response: "Buckle up buttercup! 🎢 This is gonna be LEGENDARY! (I have absolutely no plan but we'll figure it out 😂✨)",
+      gif: "https://media.giphy.com/media/artj92V8o75VENhke/giphy.gif"
+    }
   ];
 
   const handleYesClick = () => {
