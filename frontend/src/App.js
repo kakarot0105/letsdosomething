@@ -46,6 +46,20 @@ const ValentineProposal = () => {
         colors: ['#FF4D6D', '#FF8FA3', '#C9184A', '#FFCCD5']
       });
     }, 400);
+
+    setTimeout(() => {
+      setShowActivitySelect(true);
+    }, 4000);
+  };
+
+  const handleActivitySelect = (activity) => {
+    setSelectedActivity(activity);
+    confetti({
+      particleCount: 50,
+      spread: 60,
+      origin: { y: 0.6 },
+      colors: ['#FF4D6D', '#FF8FA3', '#C9184A', '#FFCCD5']
+    });
   };
 
   const moveNoButton = () => {
