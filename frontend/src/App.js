@@ -65,11 +65,21 @@ const ValentineProposal = () => {
   const moveNoButton = () => {
     setAttempts(prev => prev + 1);
     
-    const maxX = window.innerWidth - 200;
-    const maxY = window.innerHeight - 200;
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const buttonWidth = 150;
+    const buttonHeight = 60;
     
-    const newX = Math.random() * maxX - maxX / 2;
-    const newY = Math.random() * maxY - maxY / 2;
+    const maxX = (viewportWidth - buttonWidth) / 2 - 100;
+    const maxY = (viewportHeight - buttonHeight) / 2 - 100;
+    
+    const minDistance = 200;
+    
+    let newX, newY;
+    do {
+      newX = (Math.random() - 0.5) * maxX * 2;
+      newY = (Math.random() - 0.5) * maxY * 2;
+    } while (Math.abs(newX) < minDistance && Math.abs(newY) < minDistance);
     
     setNoButtonPosition({ x: newX, y: newY });
   };
