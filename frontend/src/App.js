@@ -12,8 +12,19 @@ const CONFETTI_CONFIG = {
 
 const ValentineProposal = () => {
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showActivitySelect, setShowActivitySelect] = useState(false);
+  const [selectedActivity, setSelectedActivity] = useState(null);
   const [noButtonPosition, setNoButtonPosition] = useState({ x: 100, y: 0 });
   const [attempts, setAttempts] = useState(0);
+
+  const activities = [
+    { id: 1, emoji: "🍽️", title: "Fancy Dinner", response: "Ooh fancy! Time to dress up and eat like royalty! 👑" },
+    { id: 2, emoji: "🍿", title: "Movie Marathon", response: "Perfect! I'll bring the popcorn, you bring the cuddles! 🎬" },
+    { id: 3, emoji: "💃", title: "Dance Party", response: "Let's dance like nobody's watching! (Even if they are 😂)" },
+    { id: 4, emoji: "👨‍🍳", title: "Cook Together", response: "Hope you're ready for some kitchen chaos and delicious food! 🔥" },
+    { id: 5, emoji: "🎮", title: "Game Night", response: "Game on! But I'm warning you, I play to win! 😎" },
+    { id: 6, emoji: "🌟", title: "Surprise Me!", response: "Oooh mystery date! Trust me, it's gonna be epic! 🎉" }
+  ];
 
   const handleYesClick = () => {
     setShowSuccess(true);
