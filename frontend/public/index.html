@@ -24,20 +24,77 @@
         <title>Valentine's Day Surprise 💕</title>
         <!-- Emergent script removed -->
         <style>
-            #emergent-badge { display: none !important; visibility: hidden !important; opacity: 0 !important; }
-            a[href*="emergent.sh"] { display: none !important; visibility: hidden !important; }
+            /* Hide any obvious Emergent branding elements before scripts run */
+            #emergent-badge,
+            [data-emergent-badge],
+            [id*="emergent-badge"],
+            [class*="emergent-badge"],
+            [data-branding*="emergent" i],
+            a[href*="emergent.sh" i],
+            iframe[src*="emergent" i],
+            [aria-label*="emergent" i],
+            [aria-label*="made with emergent" i] {
+                display: none !important;
+                visibility: hidden !important;
+                opacity: 0 !important;
+            }
         </style>
         <script>
             // Aggressively remove Emergent badge
-            function removeBadge() {
-                const badge = document.getElementById('emergent-badge');
-                if (badge) {
-                    badge.style.display = 'none';
-                    badge.remove();
+            const emergentSelectors = [
+                '#emergent-badge',
+                '[data-emergent-badge]',
+                '[id*="emergent-badge"]',
+                '[class*="emergent-badge"]',
+                '[data-branding*="emergent" i]',
+                'a[href*="emergent" i]',
+                'iframe[src*="emergent" i]',
+                '[aria-label*="emergent" i]',
+            ];
+
+            function hideAndRemove(node) {
+                if (!node || !node.parentNode) return;
+                node.style.setProperty('display', 'none', 'important');
+                try {
+                    node.remove();
+                } catch (err) {
+                    node.parentNode.removeChild(node);
                 }
-                document.querySelectorAll('a[href*="emergent.sh"]').forEach(el => {
-                    el.style.display = 'none';
-                    el.remove();
+            }
+
+            function removeBadge() {
+                emergentSelectors.forEach(selector => {
+                    document.querySelectorAll(selector).forEach(hideAndRemove);
+                });
+
+                // Remove containers that render the "Made with Emergent" copy
+                document.querySelectorAll('body *').forEach(node => {
+                    if (!node || node.children?.length) return;
+                    const text = node.textContent?.trim();
+                    if (!text) return;
+                    if (/made\s+with\s+emergent/i.test(text)) {
+                        const target = node.closest('a, button, div, span') || node;
+                        hideAndRemove(target);
+                    }
+                });
+
+                // Remove iframes created solely for Emergent branding
+                document.querySelectorAll('iframe').forEach(frame => {
+                    const src = frame.getAttribute('src') || '';
+                    if (/emergent/i.test(src)) {
+                        hideAndRemove(frame);
+                        return;
+                    }
+                    try {
+                        const innerText = frame?.contentDocument?.body?.innerText || '';
+                        if (/made\s+with\s+emergent/i.test(innerText)) {
+                            hideAndRemove(frame);
+                        }
+                    } catch (err) {
+                        if (/emergent/i.test(src)) {
+                            hideAndRemove(frame);
+                        }
+                    }
                 });
             }
 
@@ -53,11 +110,11 @@
             window.addEventListener('load', removeBadge);
 
             // Monitor DOM changes
-            const observer = new MutationObserver(removeBadge);
+            const observer = new MutationObserver(() => removeBadge());
             observer.observe(document.documentElement, { childList: true, subtree: true });
 
             // Also run periodically
-            setInterval(removeBadge, 100);
+            setInterval(removeBadge, 500);
         </script>
         <!--
         These two scripts have been added for the Visual Edits, please do not edit or remove them
