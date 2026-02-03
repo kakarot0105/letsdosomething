@@ -151,13 +151,13 @@ const ValentineProposal = () => {
           </motion.div>
           
           <h1 className="font-heading text-5xl md:text-7xl font-bold text-valentine-text mb-6" data-testid="success-heading">
-            Yaaay! 💕
+            Yaaay! 🎉💃
           </h1>
           
           <p className="font-body text-xl md:text-2xl text-valentine-text leading-relaxed mb-8" data-testid="success-message">
-            I knew the "No" button would wear you down! 😂 
+            I knew the "No" button would wear you down! 😂🏃‍♂️💨
             You never stood a chance against my master plan! 
-            Let's make this Valentine's Day legendary! 🎉
+            Let's make this Valentine's Day LEGENDARY! 🚀✨
           </p>
 
           {showActivitySelect && (
