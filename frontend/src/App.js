@@ -319,9 +319,8 @@ const ValentineProposal = () => {
               y: noButtonPosition.y
             }}
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
-            onHoverStart={moveNoButton}
             onClick={moveNoButton}
-            className="rounded-full px-8 py-4 text-xl font-bold border-2 shadow-lg absolute"
+            className="rounded-full px-8 py-4 text-xl font-bold border-2 shadow-lg absolute cursor-pointer"
             style={{ 
               background: 'white',
               color: '#C9184A',
