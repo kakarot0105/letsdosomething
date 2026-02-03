@@ -328,13 +328,16 @@ const ValentineProposal = () => {
               x: noButtonPosition.x,
               y: noButtonPosition.y
             }}
-            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            transition={{ type: "spring", stiffness: 400, damping: 25 }}
+            onHoverStart={moveNoButton}
+            onMouseEnter={moveNoButton}
             onClick={moveNoButton}
-            className="rounded-full px-8 py-4 text-xl font-bold border-2 shadow-lg absolute cursor-pointer"
+            className="rounded-full px-8 py-4 text-xl font-bold border-2 shadow-lg absolute cursor-pointer select-none"
             style={{ 
               background: 'white',
               color: '#C9184A',
-              borderColor: '#FF4D6D'
+              borderColor: '#FF4D6D',
+              pointerEvents: 'auto'
             }}
             data-testid="no-button"
           >
