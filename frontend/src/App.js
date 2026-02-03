@@ -85,8 +85,8 @@ const ValentineProposal = () => {
           </div>
 
           <motion.img
-            src="https://images.unsplash.com/photo-1654063655174-71e1e90bbdac?crop=entropy&cs=srgb&fm=jpg&q=85"
-            alt="Celebration"
+            src="https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif"
+            alt="Celebration Dance"
             className="mt-8 rounded-3xl shadow-2xl max-w-md mx-auto"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
