@@ -12,7 +12,7 @@ const CONFETTI_CONFIG = {
 
 const ValentineProposal = () => {
   const [showSuccess, setShowSuccess] = useState(false);
-  const [noButtonPosition, setNoButtonPosition] = useState({ x: 0, y: 0 });
+  const [noButtonPosition, setNoButtonPosition] = useState({ x: 100, y: 0 });
   const [attempts, setAttempts] = useState(0);
 
   const handleYesClick = () => {
