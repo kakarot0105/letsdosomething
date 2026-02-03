@@ -341,7 +341,7 @@ const ValentineProposal = () => {
             }}
             data-testid="no-button"
           >
-            {attempts === 0 ? "No" : attempts < 3 ? "No way!" : attempts < 5 ? "Still no!" : "Nope! 😊"}
+            {attempts === 0 ? "No 🙅" : attempts < 3 ? "No way! 🏃‍♂️" : attempts < 5 ? "Still no! 😤" : attempts < 8 ? "Nope! 😊" : "Nice try! 🤪"}
           </motion.button>
         </div>
 
