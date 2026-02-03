@@ -115,7 +115,7 @@ const ValentineProposal = () => {
             <div className="flex gap-4 justify-center items-center mb-6">
               <Heart className="w-8 h-8 text-valentine-primary fill-valentine-primary animate-pulse" />
               <p className="font-body text-xl text-valentine-accent font-semibold" data-testid="final-tagline">
-                It's a date! Can't wait! 💕
+                It's a date! Can't wait! 🗓️💕🎊
               </p>
               <Heart className="w-8 h-8 text-valentine-primary fill-valentine-primary animate-pulse" />
             </div>
