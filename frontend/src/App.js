@@ -157,8 +157,8 @@ const ValentineProposal = () => {
             </div>
 
             <motion.img
-              src="https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif"
-              alt="Celebration Dance"
+              src={selectedActivity.gif}
+              alt="Celebration"
               className="mt-8 rounded-3xl shadow-2xl max-w-sm mx-auto"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
