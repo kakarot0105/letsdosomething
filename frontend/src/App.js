@@ -72,8 +72,9 @@ const ValentineProposal = () => {
           </h1>
           
           <p className="font-body text-xl md:text-2xl text-valentine-text leading-relaxed mb-8" data-testid="success-message">
-            I knew you'd say yes! You've made me the happiest person alive. 
-            Can't wait to spend this Valentine's Day with you! 
+            I knew the "No" button would wear you down! 😂 
+            You never stood a chance against my master plan! 
+            Let's make this Valentine's Day legendary! 🎉
           </p>
           
           <div className="flex gap-4 justify-center items-center">
