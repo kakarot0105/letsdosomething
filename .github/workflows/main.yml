@@ -2,8 +2,8 @@ name: Deploy React App to GitHub Pages
 
 on:
   push:
-    branches: ["dev"]
-      workflow_dispatch:
+    branches: ["main"]
+        workflow_dispatch:
 
 permissions:
   contents: read
