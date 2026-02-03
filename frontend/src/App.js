@@ -300,13 +300,13 @@ const ValentineProposal = () => {
         <h1 className="font-heading text-5xl md:text-7xl font-bold tracking-tight mb-6" 
             style={{ color: '#590D22' }}
             data-testid="proposal-heading">
-          Will you be my Valentine?
+          Will you be my Valentine? 💘
         </h1>
 
         <p className="font-body text-lg md:text-xl leading-relaxed mb-8" 
            style={{ color: '#590D22' }}
            data-testid="proposal-subtext">
-          This Valentine's Day would be incomplete without you 💝
+          This Valentine's Day would be incomplete without you 🥺✨
         </p>
 
         <div className="flex flex-col md:flex-row gap-6 items-center justify-center mt-12 h-32 relative" data-testid="button-container">
