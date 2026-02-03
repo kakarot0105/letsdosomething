@@ -353,7 +353,7 @@ const ValentineProposal = () => {
             style={{ color: '#C9184A' }}
             data-testid="attempts-message"
           >
-            {attempts < 5 ? "Come on, you know you want to say yes! 😉" : "I can do this all day! 😄"}
+            {attempts < 5 ? "Come on, you know you want to say yes! 😉👉👈" : "I can do this all day! 😄💪 (But seriously, just say yes already! 🙏)"}
           </motion.p>
         )}
       </motion.div>
