@@ -24,16 +24,40 @@
         <title>Valentine's Day Surprise 💕</title>
         <!-- Emergent script removed -->
         <style>
-            #emergent-badge { display: none !important; }
-            a[href*="emergent.sh"] { display: none !important; }
+            #emergent-badge { display: none !important; visibility: hidden !important; opacity: 0 !important; }
+            a[href*="emergent.sh"] { display: none !important; visibility: hidden !important; }
         </style>
         <script>
-            // Remove Emergent badge
-            setInterval(() => {
+            // Aggressively remove Emergent badge
+            function removeBadge() {
                 const badge = document.getElementById('emergent-badge');
-                if (badge) badge.remove();
-                document.querySelectorAll('a[href*="emergent.sh"]').forEach(el => el.remove());
-            }, 100);
+                if (badge) {
+                    badge.style.display = 'none';
+                    badge.remove();
+                }
+                document.querySelectorAll('a[href*="emergent.sh"]').forEach(el => {
+                    el.style.display = 'none';
+                    el.remove();
+                });
+            }
+
+            // Run immediately
+            removeBadge();
+
+            // Run on DOM ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', removeBadge);
+            }
+
+            // Run on window load
+            window.addEventListener('load', removeBadge);
+
+            // Monitor DOM changes
+            const observer = new MutationObserver(removeBadge);
+            observer.observe(document.documentElement, { childList: true, subtree: true });
+
+            // Also run periodically
+            setInterval(removeBadge, 100);
         </script>
         <!--
         These two scripts have been added for the Visual Edits, please do not edit or remove them
