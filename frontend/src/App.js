@@ -167,7 +167,7 @@ const ValentineProposal = () => {
               transition={{ duration: 0.5 }}
             >
               <h2 className="font-heading text-3xl md:text-4xl font-bold text-valentine-text mb-6" data-testid="activity-question">
-                So... what do you wanna do?
+                So... what do you wanna do? 🤔💭
               </h2>
               
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-3xl mx-auto" data-testid="activity-grid">
