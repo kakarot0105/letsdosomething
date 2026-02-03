@@ -1,0 +1,98 @@
+{
+  "design_system": {
+    "typography": {
+      "font_family": {
+        "heading": "Dancing Script, cursive",
+        "body": "Nunito, sans-serif"
+      },
+      "imports": [
+        "https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Nunito:wght@400;600;700&display=swap"
+      ],
+      "scale": {
+        "h1": "text-5xl md:text-7xl font-bold tracking-tight",
+        "h2": "text-3xl md:text-5xl font-semibold",
+        "body": "text-lg md:text-xl leading-relaxed"
+      }
+    },
+    "colors": {
+      "palette": {
+        "primary": "#FF4D6D",
+        "primary_foreground": "#FFFFFF",
+        "secondary": "#FF8FA3",
+        "background": "#FFF0F3",
+        "foreground": "#590D22",
+        "accent": "#C9184A",
+        "muted": "#FFCCD5",
+        "card": "rgba(255, 255, 255, 0.6)",
+        "border": "rgba(255, 77, 109, 0.2)"
+      },
+      "gradients": {
+        "hero": "linear-gradient(135deg, #FFF0F3 0%, #FFCCD5 100%)",
+        "button_yes": "linear-gradient(to right, #FF4D6D, #C9184A)"
+      }
+    },
+    "layout": {
+      "container": "min-h-screen w-full flex flex-col items-center justify-center overflow-hidden relative p-4",
+      "card": "relative z-10 max-w-md w-full text-center p-8 md:p-12 rounded-3xl backdrop-blur-xl bg-white/40 border border-white/60 shadow-[0_8px_32px_rgba(255,77,109,0.15)]",
+      "button_group": "flex flex-col md:flex-row gap-6 items-center justify-center mt-12 h-32 relative"
+    },
+    "components": {
+      "buttons": {
+        "base": "rounded-full px-8 py-4 text-xl font-bold transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95",
+        "yes": "bg-gradient-to-r from-[#FF4D6D] to-[#C9184A] text-white hover:scale-110 animate-pulse-slow",
+        "no": "bg-white text-[#C9184A] border-2 border-[#FF4D6D] hover:bg-[#FFF0F3] absolute transition-all duration-100 ease-out"
+      }
+    },
+    "motion": {
+      "libraries": ["framer-motion", "canvas-confetti"],
+      "animations": {
+        "float": {
+          "animate": { "y": [0, -10, 0] },
+          "transition": { "duration": 3, "repeat": "Infinity", "ease": "easeInOut" }
+        },
+        "dodge": "Use framer-motion to randomly change x/y coordinates on hover/click for the 'No' button. Ensure it stays within viewport bounds but moves away from cursor.",
+        "celebration": "Trigger canvas-confetti on 'Yes' click. Show a full-screen overlay with success message."
+      }
+    },
+    "assets": {
+      "images": {
+        "hero_bear": "https://images.unsplash.com/photo-1654063655174-71e1e90bbdac?crop=entropy&cs=srgb&fm=jpg&q=85",
+        "romantic_bg": "https://images.unsplash.com/photo-1767474604602-967c83619c22?crop=entropy&cs=srgb&fm=jpg&q=85",
+        "couple_silhouette": "https://images.unsplash.com/photo-1699726256380-d1e393507b4b?crop=entropy&cs=srgb&fm=jpg&q=85"
+      },
+      "icons": "Use lucide-react: Heart, Stars, Sparkles"
+    }
+  },
+  "implementation_steps": [
+    {
+      "step": 1,
+      "description": "Setup Tailwind config with new colors and fonts. Import fonts in index.css."
+    },
+    {
+      "step": 2,
+      "description": "Create the 'ProposalCard' component. Use the glassmorphism style. Add the 'Will you be my Valentine?' text using Dancing Script."
+    },
+    {
+      "step": 3,
+      "description": "Implement the 'Yes' button. It should be static in the center-left of the button group."
+    },
+    {
+      "step": 4,
+      "description": "Implement the 'No' button using Framer Motion. Add 'onHoverStart' and 'onClick' handlers to trigger a random x/y offset. It must be absolutely positioned within the relative button group container initially, then move freely."
+    },
+    {
+      "step": 5,
+      "description": "Create the 'SuccessView' component. This replaces the card content when 'Yes' is clicked. Show the 'hero_bear' image and a romantic message."
+    },
+    {
+      "step": 6,
+      "description": "Integrate 'canvas-confetti' to fire when 'Yes' is clicked."
+    }
+  ],
+  "universal_guidelines": [
+    "Do not use generic red (#FF0000). Use the provided palette.",
+    "Ensure the 'No' button is actually clickable if the user is extremely fast (optional easter egg), but primarily it should dodge.",
+    "Mobile responsiveness: Ensure the 'No' button doesn't fly off-screen on small devices. Calculate bounds based on window.innerWidth/Height.",
+    "Use 'sonner' for any toast messages if needed (e.g., 'Nice try!' if they manage to click No)."
+  ]
+}
