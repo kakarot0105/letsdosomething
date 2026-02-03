@@ -198,7 +198,7 @@ const ValentineProposal = () => {
               <div className="flex gap-4 justify-center items-center">
                 <Sparkles className="w-8 h-8 text-valentine-accent animate-pulse" />
                 <p className="font-body text-lg text-valentine-accent font-semibold" data-testid="success-tagline">
-                  This is just the beginning of our amazing adventure together
+                  This is just the beginning of our amazing adventure together 🌈🎢
                 </p>
                 <Sparkles className="w-8 h-8 text-valentine-accent animate-pulse" />
               </div>
