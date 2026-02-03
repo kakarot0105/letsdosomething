@@ -18,12 +18,12 @@ const ValentineProposal = () => {
   const [attempts, setAttempts] = useState(0);
 
   const activities = [
-    { id: 1, emoji: "🍽️", title: "Fancy Dinner", response: "Ooh fancy! Time to dress up and eat like royalty! 👑" },
-    { id: 2, emoji: "🍿", title: "Movie Marathon", response: "Perfect! I'll bring the popcorn, you bring the cuddles! 🎬" },
-    { id: 3, emoji: "💃", title: "Dance Party", response: "Let's dance like nobody's watching! (Even if they are 😂)" },
-    { id: 4, emoji: "👨‍🍳", title: "Cook Together", response: "Hope you're ready for some kitchen chaos and delicious food! 🔥" },
-    { id: 5, emoji: "🎮", title: "Game Night", response: "Game on! But I'm warning you, I play to win! 😎" },
-    { id: 6, emoji: "🌟", title: "Surprise Me!", response: "Oooh mystery date! Trust me, it's gonna be epic! 🎉" }
+    { id: 1, emoji: "🍽️", title: "Fancy Dinner", response: "Ooh la la! 🥂 Time to put on those fancy pants and pretend we're rich! Just don't judge my table manners 😜" },
+    { id: 2, emoji: "🍿", title: "Movie Marathon", response: "Netflix and actually chill! 🛋️ I promise not to fall asleep... maybe 😴💤" },
+    { id: 3, emoji: "💃", title: "Dance Party", response: "Warning: My dance moves are FIRE! 🔥🕺 (Translation: I have no idea what I'm doing but I'll look confident 😎)" },
+    { id: 4, emoji: "👨‍🍳", title: "Cook Together", response: "Gordon Ramsay is shaking! 👨‍🍳 (Please have the fire extinguisher ready 🧯😂)" },
+    { id: 5, emoji: "🎮", title: "Game Night", response: "Controller ready! 🎮 May the best player win... which will obviously be me! 😏🏆 (But I'll let you win because I love you 🥺)" },
+    { id: 6, emoji: "🌟", title: "Surprise Me!", response: "Buckle up buttercup! 🎢 This is gonna be LEGENDARY! (I have absolutely no plan but we'll figure it out 😂✨)" }
   ];
 
   const handleYesClick = () => {
