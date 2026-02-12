@@ -11,7 +11,9 @@ const CONFETTI_CONFIG = {
 };
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:8000/api";
+const ADMIN_ACCESS_CODE = process.env.REACT_APP_ADMIN_KEY || "";
 const HOST_EMAIL_STORAGE_KEY = "valentine-host-email";
+const ADMIN_KEY_STORAGE_KEY = "valentine-admin-code";
 
 const getRecipientNameFromUrl = () => {
   if (typeof window === "undefined") {
@@ -65,12 +67,17 @@ const getHostModeFromUrl = () => {
   if (typeof window === "undefined") {
     return false;
   }
-  const params = new URLSearchParams(window.location.search);
-  const raw = params.get("host");
-  if (!raw) {
-    return false;
+  if (!ADMIN_ACCESS_CODE) {
+    return true;
   }
-  return ["1", "true", "yes"].includes(raw.toLowerCase());
+  const params = new URLSearchParams(window.location.search);
+  const providedCode = params.get("admin");
+  if (providedCode && providedCode === ADMIN_ACCESS_CODE) {
+    window.localStorage.setItem(ADMIN_KEY_STORAGE_KEY, providedCode);
+    return true;
+  }
+  const storedCode = window.localStorage.getItem(ADMIN_KEY_STORAGE_KEY);
+  return storedCode === ADMIN_ACCESS_CODE;
 };
 
 const getHostEmailFromUrl = () => {
@@ -664,7 +671,9 @@ const ShareLinkSetup = ({ isHostView }) => {
       notify: encodedEmail
     });
     const personalizedLink = `${baseUrl}?${params.toString()}`;
-    const previewLink = `${personalizedLink}&host=1`;
+    const previewLink = ADMIN_ACCESS_CODE
+      ? `${personalizedLink}&admin=${encodeURIComponent(ADMIN_ACCESS_CODE)}`
+      : personalizedLink;
 
     setGeneratedLink(personalizedLink);
     setHostPreviewLink(previewLink);
@@ -882,12 +891,16 @@ const ShareLinkSetup = ({ isHostView }) => {
 
 const ValentineProposal = () => {
   const [recipientName] = useState(getRecipientNameFromUrl);
-  const [hostOverride] = useState(getHostModeFromUrl);
   const [hostEmail] = useState(getHostEmailFromUrl);
-  const isHostView = !recipientName || hostOverride;
+  const [hasAdminAccess] = useState(getHostModeFromUrl);
+  const isHostView = hasAdminAccess;
 
   if (!recipientName) {
-    return <ShareLinkSetup isHostView={isHostView} />;
+    return hasAdminAccess ? (
+      <ShareLinkSetup isHostView={isHostView} />
+    ) : (
+      <HostAccessRequired />
+    );
   }
 
   return (
@@ -908,6 +921,30 @@ function App() {
 }
 
 export default App;
+
+const HostAccessRequired = () => {
+  return (
+    <div
+      className="min-h-screen w-full flex flex-col items-center justify-center p-8 text-center"
+      style={{ background: "linear-gradient(135deg, #FFF0F3 0%, #FFCCD5 100%)" }}
+    >
+      <div className="max-w-md rounded-3xl border border-white/40 bg-white/60 p-10 shadow-xl backdrop-blur-lg">
+        <h1 className="font-heading text-4xl text-valentine-text mb-4">
+          💌 Invitation Only
+        </h1>
+        <p className="font-body text-lg text-valentine-text/80">
+          This is the organizer view. If you&apos;re the host, open your special URL
+          that includes the secret <code>?admin=...</code> key to access the share
+          tools and Activity Log.
+        </p>
+        <p className="mt-4 text-sm text-valentine-text/70">
+          Recipients should open their personalized link (with <code>?name=</code>) to
+          see the surprise experience.
+        </p>
+      </div>
+    </div>
+  );
+};
 
 const SelectionLogViewer = ({
   isVisible,
