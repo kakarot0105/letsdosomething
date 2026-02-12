@@ -52,16 +52,19 @@ This repo contains a playful React front-end experience backed by a FastAPI serv
 - The log auto-refreshes every 15 seconds; you can also click **Refresh** to fetch immediately.
 - If the backend is offline you’ll still see the celebratory UI, but the log panel will display an error so you know to check the server.
 - Each entry now includes the recipient’s name (when provided) so you know exactly whose link produced each selection.
+- The Activity Log panel is visible only in “host mode” (when you load the site without a `name` parameter or append `&host=1`). Recipients get the clean romantic experience without the admin tools.
 
 ## Personalizing the Link
 
-Add `?name=Taylor` (or `?recipient=Taylor`) to the URL before sharing it. Example:
+If you open the site without a `name` query parameter, you’ll see a share screen where you can type the recipient’s name, click **Generate Magical Link**, and copy/preview the personalized URL in one click.
+
+You can also craft the link manually by adding `?name=Taylor` (or `?recipient=Taylor`) to the URL before sharing it. Example:
 
 ```
 http://localhost:3000/?name=Taylor
 ```
 
-When they open the page, all the headlines and celebratory copy will greet them by name, and the backend log will record who made the selection.
+When they open the page, all the headlines and celebratory copy will greet them by name, and the backend log will record who made the selection. If you want to preview the exact page while still seeing the Activity Log toggle, append `&host=1` to your personalized link (for example, `https://yourdomain.com/?name=Taylor&host=1`).
 
 ## One-Command Local Stack (Docker)
 
@@ -78,5 +81,12 @@ Services:
 - `frontend` – Production React build served by Nginx on `http://localhost:3000`.
 
 Environment files are ignored by Git, but the compose file overrides the critical values so containers can communicate (`backend` talks to `mongo`, `frontend` talks to `backend`).
+
+## Deploying to GitHub Pages
+
+- A GitHub Actions workflow (`.github/workflows/deploy-frontend.yml`) now builds the React app from `frontend/` every time you push to `main` (or trigger it manually) and publishes the static files to the `gh-pages` branch.
+- Before running it, set a repository variable named `REACT_APP_API_BASE_URL` so the build points at your hosted FastAPI endpoint (Settings → Secrets and variables → Actions → Variables).
+- If you have a custom domain, keep the `CNAME` file at the repo root; the workflow copies it into the published build automatically.
+- In **Settings → Pages**, choose **Branch: gh-pages / root** so GitHub Pages serves the generated site. Once that’s set, your custom domain will show the latest build after each push.
 
 Enjoy surprising your Valentine and keep track of what they picked! 💘

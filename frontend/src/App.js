@@ -35,7 +35,19 @@ const getClientFingerprint = () => {
   return generated;
 };
 
-const ValentineProposal = () => {
+const getHostModeFromUrl = () => {
+  if (typeof window === "undefined") {
+    return false;
+  }
+  const params = new URLSearchParams(window.location.search);
+  const raw = params.get("host");
+  if (!raw) {
+    return false;
+  }
+  return ["1", "true", "yes"].includes(raw.toLowerCase());
+};
+
+const ValentineExperience = ({ recipientName, isHostView }) => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [showActivitySelect, setShowActivitySelect] = useState(false);
   const [selectedActivity, setSelectedActivity] = useState(null);
@@ -48,7 +60,6 @@ const ValentineProposal = () => {
   const [isPersistingSelection, setIsPersistingSelection] = useState(false);
   const [lastSyncedAt, setLastSyncedAt] = useState(null);
   const [clientFingerprint] = useState(getClientFingerprint);
-  const [recipientName] = useState(getRecipientNameFromUrl);
 
   const displayName = recipientName || "sweetheart";
 
@@ -512,17 +523,217 @@ const ValentineProposal = () => {
   return (
     <>
       {content}
-      <SelectionLogViewer
-        isVisible={isActivityLogVisible}
-        onToggle={toggleActivityLog}
-        onRefresh={fetchActivityLog}
-        selections={activityLog}
-        isLoading={isLogLoading}
-        isPersistingSelection={isPersistingSelection}
-        error={logError}
-        lastSyncedAt={lastSyncedAt}
-      />
+      {isHostView && (
+        <SelectionLogViewer
+          isVisible={isActivityLogVisible}
+          onToggle={toggleActivityLog}
+          onRefresh={fetchActivityLog}
+          selections={activityLog}
+          isLoading={isLogLoading}
+          isPersistingSelection={isPersistingSelection}
+          error={logError}
+          lastSyncedAt={lastSyncedAt}
+        />
+      )}
     </>
+  );
+};
+
+const ShareLinkSetup = ({ isHostView }) => {
+  const [nameInput, setNameInput] = useState("");
+  const [generatedLink, setGeneratedLink] = useState("");
+  const [copyStatus, setCopyStatus] = useState("idle");
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const baseUrl =
+    typeof window !== "undefined"
+      ? `${window.location.origin}${window.location.pathname}`
+      : "";
+
+  const currentName = nameInput.trim();
+
+  const handleGenerateLink = (event) => {
+    event.preventDefault();
+    if (!currentName) {
+      setErrorMessage("Please type a name so we can personalize the invite.");
+      setGeneratedLink("");
+      return;
+    }
+
+    const personalizedLink = `${baseUrl}?name=${encodeURIComponent(currentName)}`;
+    setGeneratedLink(personalizedLink);
+    setCopyStatus("idle");
+    setErrorMessage("");
+  };
+
+  const handleCopyLink = async () => {
+    if (!generatedLink) return;
+
+    try {
+      await navigator.clipboard.writeText(generatedLink);
+      setCopyStatus("copied");
+    } catch (error) {
+      console.error("Failed to copy link", error);
+      setCopyStatus("failed");
+    }
+  };
+
+  const handlePreviewLink = () => {
+    if (!generatedLink) return;
+    window.open(generatedLink, "_blank", "noopener,noreferrer");
+  };
+
+  return (
+    <div
+      className="min-h-screen w-full flex flex-col items-center justify-center overflow-hidden relative p-4"
+      style={{ background: "linear-gradient(135deg, #FFF0F3 0%, #FFCCD5 100%)" }}
+      data-testid="share-screen"
+    >
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <motion.div
+          className="absolute top-8 left-12"
+          animate={{ rotate: 360 }}
+          transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
+        >
+          <Heart className="w-14 h-14 text-valentine-secondary opacity-20" />
+        </motion.div>
+        <motion.div
+          className="absolute bottom-10 right-14"
+          animate={{ rotate: -360 }}
+          transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+        >
+          <Sparkles className="w-10 h-10 text-valentine-accent opacity-20" />
+        </motion.div>
+      </div>
+
+      <div
+        className="relative z-10 w-full max-w-2xl text-center p-8 md:p-12 rounded-3xl backdrop-blur-xl border shadow-[0_8px_32px_rgba(255,77,109,0.15)]"
+        style={{
+          background: "rgba(255, 255, 255, 0.4)",
+          borderColor: "rgba(255, 77, 109, 0.2)"
+        }}
+      >
+        <h1
+          className="font-heading text-5xl md:text-6xl font-bold tracking-tight mb-4"
+          style={{ color: "#590D22" }}
+        >
+          Who do you want to invite?
+        </h1>
+        <p
+          className="font-body text-lg md:text-xl text-valentine-text mb-8"
+          data-testid="share-subtext"
+        >
+          Type their name, generate a magical link, and share it. When they open
+          it, the page greets them personally and logs whichever activity they
+          pick.
+        </p>
+
+        <form
+          className="flex flex-col gap-4 items-center"
+          onSubmit={handleGenerateLink}
+        >
+          <input
+            type="text"
+            className="w-full rounded-full border-2 border-valentine-primary/40 px-6 py-3 text-lg font-body shadow-inner focus:outline-none focus:ring-4 focus:ring-valentine-primary/30"
+            placeholder="Type their name…"
+            value={nameInput}
+            onChange={(event) => setNameInput(event.target.value)}
+            data-testid="share-name-input"
+          />
+          <button
+            type="submit"
+            className="rounded-full px-10 py-4 text-xl font-bold shadow-lg hover:shadow-xl text-white animate-pulse-slow"
+            style={{
+              background: "linear-gradient(to right, #FF4D6D, #C9184A)"
+            }}
+            data-testid="share-generate-button"
+          >
+            Generate Magical Link ✨
+          </button>
+        </form>
+
+        {errorMessage && (
+          <p className="mt-4 text-sm text-red-600">{errorMessage}</p>
+        )}
+
+        {generatedLink && (
+          <div
+            className="mt-10 rounded-2xl border border-valentine-primary/30 bg-white/80 p-6 text-left shadow-lg"
+            data-testid="share-link-card"
+          >
+            <p className="font-heading text-2xl text-valentine-text mb-3">
+              Share this with {currentName || "your Valentine"}:
+            </p>
+            <div className="flex flex-col gap-4 md:flex-row">
+              <input
+                readOnly
+                value={generatedLink}
+                className="flex-1 rounded-xl border border-valentine-primary/40 px-4 py-3 font-mono text-sm text-valentine-text bg-white/90"
+                onFocus={(event) => event.target.select()}
+                data-testid="share-link-output"
+              />
+              <button
+                type="button"
+                onClick={handleCopyLink}
+                className="rounded-xl px-6 py-3 font-semibold text-white shadow-lg hover:shadow-xl"
+                style={{ background: "#FF4D6D" }}
+                data-testid="share-copy-button"
+              >
+                {copyStatus === "copied" ? "Copied! 💌" : "Copy Link"}
+              </button>
+            </div>
+            <div className="mt-4 flex flex-wrap justify-center gap-4">
+              <button
+                type="button"
+                onClick={handlePreviewLink}
+                className="rounded-full border border-valentine-primary/40 px-6 py-3 font-semibold text-valentine-text hover:bg-white"
+                data-testid="share-preview-button"
+              >
+                Preview Link
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setNameInput("");
+                  setGeneratedLink("");
+                  setCopyStatus("idle");
+                }}
+                className="rounded-full border border-valentine-primary/40 px-6 py-3 font-semibold text-valentine-text hover:bg-white"
+                data-testid="share-reset-button"
+              >
+                Create Another
+              </button>
+            </div>
+            <p className="mt-4 text-sm text-valentine-text/80">
+              Anyone opening this link will see their name in the proposal
+              screen, and their choice will appear in your Activity Log.
+            </p>
+            {copyStatus === "failed" && (
+              <p className="mt-2 text-xs text-red-600">
+                Copy failed—please select the link above and copy it manually.
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const ValentineProposal = () => {
+  const [recipientName] = useState(getRecipientNameFromUrl);
+  const [hostOverride] = useState(getHostModeFromUrl);
+  const isHostView = !recipientName || hostOverride;
+
+  if (!recipientName) {
+    return <ShareLinkSetup isHostView={isHostView} />;
+  }
+
+  return (
+    <ValentineExperience
+      recipientName={recipientName}
+      isHostView={isHostView}
+    />
   );
 };
 
