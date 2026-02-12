@@ -133,7 +133,12 @@ async def list_activity_selections(x_admin_key: Optional[str] = Header(default=N
 
 
 async def send_selection_notification(selection: ActivitySelection):
-    if not EMAIL_NOTIFICATIONS_ENABLED or not selection.host_email:
+    if not EMAIL_NOTIFICATIONS_ENABLED:
+        logger.warning("Email notification skipped: SMTP is not fully configured.")
+        return
+
+    if not selection.host_email:
+        logger.warning("Email notification skipped: host_email missing in activity payload.")
         return
 
     try:
@@ -176,6 +181,13 @@ def _send_email_sync(selection: ActivitySelection):
         if SMTP_USERNAME and SMTP_PASSWORD:
             server.login(SMTP_USERNAME, SMTP_PASSWORD)
         server.send_message(message)
+
+    logger.info(
+        "Notification email sent to %s for recipient=%s activity=%s",
+        selection.host_email,
+        selection.recipient_name or "unknown",
+        selection.activity_title,
+    )
 
 # Include the router in the main app
 app.include_router(api_router)

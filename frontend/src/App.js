@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import "@/App.css";
 import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
@@ -11,7 +11,6 @@ const CONFETTI_CONFIG = {
 };
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:8000/api";
-const ADMIN_ACCESS_CODE = process.env.REACT_APP_ADMIN_KEY || "";
 const HOST_EMAIL_STORAGE_KEY = "valentine-host-email";
 
 const activities = [
@@ -121,37 +120,7 @@ const getHostEmailFromUrl = () => {
   return decodeEmailFromLink(encoded);
 };
 
-const getHasAdminAccess = () => {
-  if (!ADMIN_ACCESS_CODE) {
-    return false;
-  }
-  const params = getSearchParams();
-  return params.get("admin") === ADMIN_ACCESS_CODE;
-};
-
-const getIsDashboardMode = () => {
-  const params = getSearchParams();
-  return params.get("dashboard") === "1";
-};
-
-const getApiHeaders = (includeAdmin = false) => {
-  const headers = { "Content-Type": "application/json" };
-  if (includeAdmin && ADMIN_ACCESS_CODE) {
-    headers["X-Admin-Key"] = ADMIN_ACCESS_CODE;
-  }
-  return headers;
-};
-
-const formatTimestamp = (value) => {
-  if (!value) {
-    return "Unknown time";
-  }
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) {
-    return value;
-  }
-  return parsed.toLocaleString();
-};
+const getApiHeaders = () => ({ "Content-Type": "application/json" });
 
 const ValentineExperience = ({ recipientName, hostEmail }) => {
   const [showSuccess, setShowSuccess] = useState(false);
@@ -444,7 +413,7 @@ const ValentineExperience = ({ recipientName, hostEmail }) => {
   );
 };
 
-const ShareLinkSetup = ({ hasAdminAccess }) => {
+const ShareLinkSetup = () => {
   const [nameInput, setNameInput] = useState("");
   const [hostEmailInput, setHostEmailInput] = useState(() => {
     if (typeof window === "undefined") {
@@ -463,10 +432,6 @@ const ShareLinkSetup = ({ hasAdminAccess }) => {
 
   const currentName = nameInput.trim();
   const currentEmail = hostEmailInput.trim();
-  const dashboardUrl =
-    ADMIN_ACCESS_CODE && baseUrl
-      ? `${baseUrl}?dashboard=1&admin=${encodeURIComponent(ADMIN_ACCESS_CODE)}`
-      : "";
 
   const isValidEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.toLowerCase());
 
@@ -568,15 +533,6 @@ const ShareLinkSetup = ({ hasAdminAccess }) => {
               >
                 {copyStatus === "copied" ? "Copied! 💌" : "Copy Invite Link"}
               </button>
-              {dashboardUrl && hasAdminAccess && (
-                <button
-                  type="button"
-                  onClick={() => copyText(dashboardUrl)}
-                  className="rounded-full border border-valentine-primary/40 px-6 py-3 font-semibold text-valentine-text hover:bg-white"
-                >
-                  Copy Dashboard URL
-                </button>
-              )}
             </div>
             {copyStatus === "failed" && (
               <p className="mt-2 text-xs text-red-600">
@@ -590,137 +546,12 @@ const ShareLinkSetup = ({ hasAdminAccess }) => {
   );
 };
 
-const DashboardAccessRequired = () => {
-  return (
-    <div
-      className="min-h-screen w-full flex flex-col items-center justify-center p-8 text-center"
-      style={{ background: "linear-gradient(135deg, #FFF0F3 0%, #FFCCD5 100%)" }}
-    >
-      <div className="max-w-md rounded-3xl border border-white/40 bg-white/60 p-10 shadow-xl backdrop-blur-lg">
-        <h1 className="font-heading text-4xl text-valentine-text mb-4">Dashboard Locked</h1>
-        <p className="font-body text-lg text-valentine-text/80">
-          Open this URL with your admin key: <code>?dashboard=1&amp;admin=...</code>
-        </p>
-      </div>
-    </div>
-  );
-};
-
-const AdminDashboard = ({ hasAdminAccess }) => {
-  const [selections, setSelections] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [lastSyncedAt, setLastSyncedAt] = useState(null);
-
-  const loadSelections = useCallback(async () => {
-    if (!hasAdminAccess) {
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      setError("");
-      const response = await fetch(`${API_BASE_URL}/activity`, {
-        method: "GET",
-        headers: getApiHeaders(true)
-      });
-
-      if (!response.ok) {
-        throw new Error(`Unable to load dashboard (${response.status})`);
-      }
-
-      const data = await response.json();
-      setSelections(data);
-      setLastSyncedAt(new Date());
-    } catch (err) {
-      console.error("Failed to load dashboard", err);
-      setError(err.message || "Failed to load dashboard.");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [hasAdminAccess]);
-
-  useEffect(() => {
-    if (!hasAdminAccess) {
-      return undefined;
-    }
-    loadSelections();
-    const interval = setInterval(loadSelections, 15000);
-    return () => clearInterval(interval);
-  }, [hasAdminAccess, loadSelections]);
-
-  if (!hasAdminAccess) {
-    return <DashboardAccessRequired />;
-  }
-
-  return (
-    <div
-      className="min-h-screen w-full p-6 md:p-10"
-      style={{ background: "linear-gradient(135deg, #FFF0F3 0%, #FFCCD5 100%)" }}
-    >
-      <div className="mx-auto max-w-5xl rounded-3xl border border-white/40 bg-white/70 p-6 shadow-xl backdrop-blur-lg">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h1 className="font-heading text-4xl text-valentine-text">Admin Dashboard</h1>
-          <button
-            type="button"
-            onClick={loadSelections}
-            disabled={isLoading}
-            className="rounded-full border border-valentine-primary/40 px-5 py-2 font-semibold text-valentine-text hover:bg-white disabled:opacity-60"
-          >
-            {isLoading ? "Refreshing..." : "Refresh"}
-          </button>
-        </div>
-
-        <p className="mt-2 text-sm text-valentine-accent">
-          Last updated: {lastSyncedAt ? lastSyncedAt.toLocaleTimeString() : "Never"}
-        </p>
-
-        {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
-
-        <div className="mt-6 grid gap-3">
-          {!isLoading && selections.length === 0 && (
-            <p className="text-valentine-text/70">No selections recorded yet.</p>
-          )}
-
-          {selections.map((selection) => (
-            <div
-              key={selection.id}
-              className="rounded-2xl border border-valentine-primary/30 bg-white/90 p-4 shadow-sm"
-            >
-              <p className="text-xl font-semibold text-valentine-text">
-                <span className="mr-2">{selection.activity_emoji}</span>
-                {selection.activity_title}
-              </p>
-              <p className="text-sm text-valentine-accent">{formatTimestamp(selection.timestamp)}</p>
-              <p className="text-sm text-slate-600">
-                Recipient: {selection.recipient_name || "Unknown"}
-              </p>
-              <p className="text-sm text-slate-600">
-                Host email: {selection.host_email || "Not provided"}
-              </p>
-              {selection.client_hint && (
-                <p className="text-sm text-slate-500">Client: {selection.client_hint}</p>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-};
-
 const ValentineProposal = () => {
   const [recipientName] = useState(getRecipientNameFromUrl);
   const [hostEmail] = useState(getHostEmailFromUrl);
-  const [isDashboardMode] = useState(getIsDashboardMode);
-  const [hasAdminAccess] = useState(getHasAdminAccess);
-
-  if (isDashboardMode) {
-    return <AdminDashboard hasAdminAccess={hasAdminAccess} />;
-  }
 
   if (!recipientName) {
-    return <ShareLinkSetup hasAdminAccess={hasAdminAccess} />;
+    return <ShareLinkSetup />;
   }
 
   return <ValentineExperience recipientName={recipientName} hostEmail={hostEmail} />;
