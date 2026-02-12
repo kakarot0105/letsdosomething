@@ -154,8 +154,6 @@ def _send_email_sync(selection: ActivitySelection):
         "",
         f"Recorded at: {timestamp_display}",
         "",
-        "Check the Activity Log for more details.",
-        "",
         "With love,",
         "Your Valentine App 💞",
     ]
