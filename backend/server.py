@@ -5,6 +5,7 @@ import smtplib
 import uuid
 from datetime import datetime, timezone
 from email.message import EmailMessage
+from email.utils import formataddr
 from pathlib import Path
 from typing import List, Optional
 
@@ -25,9 +26,10 @@ db = client[os.environ['DB_NAME']]
 
 SMTP_HOST = os.environ.get('SMTP_HOST')
 SMTP_PORT = int(os.environ.get('SMTP_PORT', '587'))
-SMTP_USERNAME = os.environ.get('SMTP_USERNAME')
+SMTP_USERNAME = os.environ.get('SMTP_USERNAME') or os.environ.get('SMTP_USER')
 SMTP_PASSWORD = os.environ.get('SMTP_PASSWORD')
 SMTP_FROM_EMAIL = os.environ.get('SMTP_FROM_EMAIL')
+SMTP_FROM_NAME = os.environ.get('SMTP_FROM_NAME')
 SMTP_USE_TLS = os.environ.get('SMTP_USE_TLS', 'true').lower() == 'true'
 
 EMAIL_NOTIFICATIONS_ENABLED = bool(SMTP_HOST and SMTP_FROM_EMAIL)
@@ -159,7 +161,10 @@ def _send_email_sync(selection: ActivitySelection):
     ]
     message = EmailMessage()
     message['Subject'] = subject
-    message['From'] = SMTP_FROM_EMAIL
+    if SMTP_FROM_NAME:
+        message['From'] = formataddr((SMTP_FROM_NAME, SMTP_FROM_EMAIL))
+    else:
+        message['From'] = SMTP_FROM_EMAIL
     message['To'] = selection.host_email
     message.set_content("\n".join(body_lines))
 
