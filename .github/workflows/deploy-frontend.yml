@@ -35,8 +35,10 @@ jobs:
         run: npm run build
 
       - name: Include custom domain file (CNAME)
-        if: ${{ hashFiles('../CNAME') != '' }}
-        run: cp ../CNAME build/CNAME
+        run: |
+          if [ -f "../CNAME" ]; then
+            cp ../CNAME build/CNAME
+          fi
 
       - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v3
