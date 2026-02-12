@@ -12,6 +12,15 @@ const CONFETTI_CONFIG = {
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:8000/api";
 
+const getRecipientNameFromUrl = () => {
+  if (typeof window === "undefined") {
+    return null;
+  }
+  const params = new URLSearchParams(window.location.search);
+  const raw = params.get("name") || params.get("recipient");
+  return raw ? raw.trim() : null;
+};
+
 const getClientFingerprint = () => {
   if (typeof window === "undefined") {
     return "unknown-client";
@@ -39,6 +48,9 @@ const ValentineProposal = () => {
   const [isPersistingSelection, setIsPersistingSelection] = useState(false);
   const [lastSyncedAt, setLastSyncedAt] = useState(null);
   const [clientFingerprint] = useState(getClientFingerprint);
+  const [recipientName] = useState(getRecipientNameFromUrl);
+
+  const displayName = recipientName || "sweetheart";
 
   const activities = [
     { 
@@ -130,7 +142,8 @@ const ValentineProposal = () => {
             activity_title: activity.title,
             activity_emoji: activity.emoji,
             activity_response: activity.response,
-            client_hint: `${clientFingerprint}@${locationHint}`
+            client_hint: `${clientFingerprint}@${locationHint}`,
+            recipient_name: recipientName
           })
         });
 
@@ -146,7 +159,7 @@ const ValentineProposal = () => {
         setIsPersistingSelection(false);
       }
     },
-    [clientFingerprint, fetchActivityLog]
+    [clientFingerprint, fetchActivityLog, recipientName]
   );
 
   useEffect(() => {
@@ -251,7 +264,7 @@ const ValentineProposal = () => {
             <div className="flex gap-4 justify-center items-center mb-6">
               <Heart className="w-8 h-8 text-valentine-primary fill-valentine-primary animate-pulse" />
               <p className="font-body text-xl text-valentine-accent font-semibold" data-testid="final-tagline">
-                It's a date! Can't wait! 🗓️💕🎊
+                It's a date, {displayName}! Can't wait! 🗓️💕🎊
               </p>
               <Heart className="w-8 h-8 text-valentine-primary fill-valentine-primary animate-pulse" />
             </div>
@@ -285,15 +298,15 @@ const ValentineProposal = () => {
               <Heart className="w-24 h-24 mx-auto mb-6 text-valentine-primary fill-valentine-primary" data-testid="success-heart-icon" />
             </motion.div>
             
-            <h1 className="font-heading text-5xl md:text-7xl font-bold text-valentine-text mb-6" data-testid="success-heading">
-              Yaaay! 🎉💃
-            </h1>
-            
-            <p className="font-body text-xl md:text-2xl text-valentine-text leading-relaxed mb-8" data-testid="success-message">
-              I knew the "No" button would wear you down! 😂🏃‍♂️💨
-              You never stood a chance against my master plan! 
-              Let's make this Valentine's Day LEGENDARY! 🚀✨
-            </p>
+          <h1 className="font-heading text-5xl md:text-7xl font-bold text-valentine-text mb-6" data-testid="success-heading">
+            Yaaay, {displayName}! 🎉💃
+          </h1>
+          
+          <p className="font-body text-xl md:text-2xl text-valentine-text leading-relaxed mb-8" data-testid="success-message">
+            I knew the "No" button would wear you down, {displayName}! 😂🏃‍♂️💨
+            You never stood a chance against my master plan! 
+            Let's make this Valentine's Day LEGENDARY! 🚀✨
+          </p>
 
             {showActivitySelect && (
               <motion.div
@@ -432,17 +445,17 @@ const ValentineProposal = () => {
             <Heart className="w-20 h-20 mx-auto mb-6 text-valentine-primary fill-valentine-primary" data-testid="proposal-heart-icon" />
           </motion.div>
 
-          <h1 className="font-heading text-5xl md:text-7xl font-bold tracking-tight mb-6" 
-              style={{ color: '#590D22' }}
-              data-testid="proposal-heading">
-            Will you be my Valentine? 💘
-          </h1>
+        <h1 className="font-heading text-5xl md:text-7xl font-bold tracking-tight mb-6" 
+            style={{ color: '#590D22' }}
+            data-testid="proposal-heading">
+          Will you be my Valentine, {displayName}? 💘
+        </h1>
 
-          <p className="font-body text-lg md:text-xl leading-relaxed mb-8" 
-             style={{ color: '#590D22' }}
-             data-testid="proposal-subtext">
-            This Valentine's Day would be incomplete without you 🥺✨
-          </p>
+        <p className="font-body text-lg md:text-xl leading-relaxed mb-8" 
+           style={{ color: '#590D22' }}
+           data-testid="proposal-subtext">
+          This Valentine's Day would be incomplete without you, {displayName}! 🥺✨
+        </p>
 
           <div className="flex flex-col md:flex-row gap-6 items-center justify-center mt-12 h-32 relative" data-testid="button-container">
             <motion.button
@@ -599,6 +612,9 @@ const SelectionLogViewer = ({
                 <p className="text-xs text-valentine-accent">
                   {formatTimestamp(selection.timestamp)}
                 </p>
+                {selection.recipient_name && (
+                  <p className="text-xs text-slate-500">For: {selection.recipient_name}</p>
+                )}
                 {selection.client_hint && (
                   <p className="text-xs text-slate-500">Client: {selection.client_hint}</p>
                 )}

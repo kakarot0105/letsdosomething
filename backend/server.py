@@ -47,6 +47,7 @@ class ActivitySelection(BaseModel):
     activity_emoji: str
     activity_response: Optional[str] = None
     client_hint: Optional[str] = None
+    recipient_name: Optional[str] = None
     timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
@@ -56,6 +57,7 @@ class ActivitySelectionCreate(BaseModel):
     activity_emoji: str
     activity_response: Optional[str] = None
     client_hint: Optional[str] = None
+    recipient_name: Optional[str] = None
 
 # Add your routes to the router instead of directly to app
 @api_router.get("/")

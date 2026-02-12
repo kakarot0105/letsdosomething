@@ -51,6 +51,17 @@ This repo contains a playful React front-end experience backed by a FastAPI serv
 - When expanded, it shows the most recent choices (emoji, activity name, timestamp, and optional client hint).
 - The log auto-refreshes every 15 seconds; you can also click **Refresh** to fetch immediately.
 - If the backend is offline you’ll still see the celebratory UI, but the log panel will display an error so you know to check the server.
+- Each entry now includes the recipient’s name (when provided) so you know exactly whose link produced each selection.
+
+## Personalizing the Link
+
+Add `?name=Taylor` (or `?recipient=Taylor`) to the URL before sharing it. Example:
+
+```
+http://localhost:3000/?name=Taylor
+```
+
+When they open the page, all the headlines and celebratory copy will greet them by name, and the backend log will record who made the selection.
 
 ## One-Command Local Stack (Docker)
 
