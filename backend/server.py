@@ -6,7 +6,7 @@ import os
 import logging
 from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict
-from typing import List
+from typing import List, Optional
 import uuid
 from datetime import datetime, timezone
 
@@ -37,6 +37,26 @@ class StatusCheck(BaseModel):
 class StatusCheckCreate(BaseModel):
     client_name: str
 
+
+class ActivitySelection(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    activity_id: int
+    activity_title: str
+    activity_emoji: str
+    activity_response: Optional[str] = None
+    client_hint: Optional[str] = None
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class ActivitySelectionCreate(BaseModel):
+    activity_id: int
+    activity_title: str
+    activity_emoji: str
+    activity_response: Optional[str] = None
+    client_hint: Optional[str] = None
+
 # Add your routes to the router instead of directly to app
 @api_router.get("/")
 async def root():
@@ -46,25 +66,46 @@ async def root():
 async def create_status_check(input: StatusCheckCreate):
     status_dict = input.model_dump()
     status_obj = StatusCheck(**status_dict)
-    
-    # Convert to dict and serialize datetime to ISO string for MongoDB
+
     doc = status_obj.model_dump()
     doc['timestamp'] = doc['timestamp'].isoformat()
-    
-    _ = await db.status_checks.insert_one(doc)
+
+    await db.status_checks.insert_one(doc)
     return status_obj
+
 
 @api_router.get("/status", response_model=List[StatusCheck])
 async def get_status_checks():
-    # Exclude MongoDB's _id field from the query results
     status_checks = await db.status_checks.find({}, {"_id": 0}).to_list(1000)
-    
-    # Convert ISO string timestamps back to datetime objects
+
     for check in status_checks:
         if isinstance(check['timestamp'], str):
             check['timestamp'] = datetime.fromisoformat(check['timestamp'])
-    
+
     return status_checks
+
+
+@api_router.post("/activity", response_model=ActivitySelection)
+async def create_activity_selection(input: ActivitySelectionCreate):
+    selection_dict = input.model_dump()
+    selection_obj = ActivitySelection(**selection_dict)
+
+    doc = selection_obj.model_dump()
+    doc['timestamp'] = doc['timestamp'].isoformat()
+
+    await db.activity_selections.insert_one(doc)
+    return selection_obj
+
+
+@api_router.get("/activity", response_model=List[ActivitySelection])
+async def list_activity_selections():
+    selections = await db.activity_selections.find({}, {"_id": 0}).sort("timestamp", -1).to_list(100)
+
+    for selection in selections:
+        if isinstance(selection['timestamp'], str):
+            selection['timestamp'] = datetime.fromisoformat(selection['timestamp'])
+
+    return selections
 
 # Include the router in the main app
 app.include_router(api_router)

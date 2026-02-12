@@ -1,0 +1,12 @@
+__pycache__
+*.py[cod]
+*.pyc
+.env
+.env.*
+.eggs
+*.egg-info
+.build
+pip-wheel-metadata
+.pytest_cache
+.mypy_cache
+.DS_Store
