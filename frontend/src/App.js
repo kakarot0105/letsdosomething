@@ -67,7 +67,7 @@ const getHostModeFromUrl = () => {
     return false;
   }
   if (!ADMIN_ACCESS_CODE) {
-    return true;
+    return false;
   }
   const params = new URLSearchParams(window.location.search);
   const providedCode = params.get("admin");
