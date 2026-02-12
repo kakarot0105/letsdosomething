@@ -13,7 +13,6 @@ const CONFETTI_CONFIG = {
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:8000/api";
 const ADMIN_ACCESS_CODE = process.env.REACT_APP_ADMIN_KEY || "";
 const HOST_EMAIL_STORAGE_KEY = "valentine-host-email";
-const ADMIN_KEY_STORAGE_KEY = "valentine-admin-code";
 
 const getRecipientNameFromUrl = () => {
   if (typeof window === "undefined") {
@@ -72,12 +71,7 @@ const getHostModeFromUrl = () => {
   }
   const params = new URLSearchParams(window.location.search);
   const providedCode = params.get("admin");
-  if (providedCode && providedCode === ADMIN_ACCESS_CODE) {
-    window.localStorage.setItem(ADMIN_KEY_STORAGE_KEY, providedCode);
-    return true;
-  }
-  const storedCode = window.localStorage.getItem(ADMIN_KEY_STORAGE_KEY);
-  return storedCode === ADMIN_ACCESS_CODE;
+  return providedCode === ADMIN_ACCESS_CODE;
 };
 
 const getHostEmailFromUrl = () => {
