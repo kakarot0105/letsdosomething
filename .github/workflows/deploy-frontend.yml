@@ -17,6 +17,7 @@ jobs:
         working-directory: frontend
     env:
       REACT_APP_API_BASE_URL: ${{ vars.REACT_APP_API_BASE_URL || 'https://your-backend-host/api' }}
+      REACT_APP_ADMIN_KEY: ${{ vars.REACT_APP_ADMIN_KEY || '' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

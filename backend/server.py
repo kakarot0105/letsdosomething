@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import List, Optional
 
 from dotenv import load_dotenv
-from fastapi import APIRouter, FastAPI
+from fastapi import APIRouter, FastAPI, Header, HTTPException
 from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 from starlette.middleware.cors import CORSMiddleware
@@ -31,6 +31,7 @@ SMTP_PASSWORD = os.environ.get('SMTP_PASSWORD')
 SMTP_FROM_EMAIL = os.environ.get('SMTP_FROM_EMAIL')
 SMTP_FROM_NAME = os.environ.get('SMTP_FROM_NAME')
 SMTP_USE_TLS = os.environ.get('SMTP_USE_TLS', 'true').lower() == 'true'
+ADMIN_API_KEY = os.environ.get('ADMIN_API_KEY')
 
 EMAIL_NOTIFICATIONS_ENABLED = bool(SMTP_HOST and SMTP_FROM_EMAIL)
 
@@ -118,7 +119,10 @@ async def create_activity_selection(input: ActivitySelectionCreate):
 
 
 @api_router.get("/activity", response_model=List[ActivitySelection])
-async def list_activity_selections():
+async def list_activity_selections(x_admin_key: Optional[str] = Header(default=None)):
+    if ADMIN_API_KEY and x_admin_key != ADMIN_API_KEY:
+        raise HTTPException(status_code=403, detail="Admin access required")
+
     selections = await db.activity_selections.find({}, {"_id": 0}).sort("timestamp", -1).to_list(100)
 
     for selection in selections:
