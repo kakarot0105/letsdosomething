@@ -56,7 +56,7 @@ This repo contains a playful React front-end experience backed by a FastAPI serv
 
 ## Personalizing the Link
 
-If you open the site without a `name` query parameter, you’ll see a share screen where you can type the recipient’s name, click **Generate Magical Link**, and copy/preview the personalized URL in one click.
+If you open the site without a `name` query parameter, you’ll see a share screen where you can type the recipient’s name **and the email address where you want updates**, click **Generate Magical Link**, and copy/preview the personalized URL in one click.
 
 You can also craft the link manually by adding `?name=Taylor` (or `?recipient=Taylor`) to the URL before sharing it. Example:
 
@@ -65,6 +65,13 @@ http://localhost:3000/?name=Taylor
 ```
 
 When they open the page, all the headlines and celebratory copy will greet them by name, and the backend log will record who made the selection. If you want to preview the exact page while still seeing the Activity Log toggle, append `&host=1` to your personalized link (for example, `https://yourdomain.com/?name=Taylor&host=1`).
+
+## Email Alerts
+
+- Each time you generate a link, include the email where you want notifications. That address is stored locally for convenience and encoded inside the link so only you receive admin messages.
+- When your Valentine picks an activity, the backend emails you the details (recipient name, emoji, timestamp, response text) and still logs the choice for the Activity Log panel.
+- Set `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_FROM_EMAIL`, and `SMTP_USE_TLS` in `backend/.env` so the FastAPI service can authenticate with your mail provider. Without them, selections are stored but no emails are sent.
+- To view the Activity Log while impersonating a recipient, append `&host=1` to the personalized link (e.g., `https://yourdomain.com/?name=Taylor&host=1`). Recipients get the same link without that flag, so they never see the admin tools.
 
 ## One-Command Local Stack (Docker)
 

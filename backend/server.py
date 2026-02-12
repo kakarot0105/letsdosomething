@@ -1,14 +1,18 @@
-from fastapi import FastAPI, APIRouter
-from dotenv import load_dotenv
-from starlette.middleware.cors import CORSMiddleware
-from motor.motor_asyncio import AsyncIOMotorClient
-import os
+import asyncio
 import logging
-from pathlib import Path
-from pydantic import BaseModel, Field, ConfigDict
-from typing import List, Optional
+import os
+import smtplib
 import uuid
 from datetime import datetime, timezone
+from email.message import EmailMessage
+from pathlib import Path
+from typing import List, Optional
+
+from dotenv import load_dotenv
+from fastapi import APIRouter, FastAPI
+from motor.motor_asyncio import AsyncIOMotorClient
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from starlette.middleware.cors import CORSMiddleware
 
 
 ROOT_DIR = Path(__file__).parent
@@ -18,6 +22,15 @@ load_dotenv(ROOT_DIR / '.env')
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
+
+SMTP_HOST = os.environ.get('SMTP_HOST')
+SMTP_PORT = int(os.environ.get('SMTP_PORT', '587'))
+SMTP_USERNAME = os.environ.get('SMTP_USERNAME')
+SMTP_PASSWORD = os.environ.get('SMTP_PASSWORD')
+SMTP_FROM_EMAIL = os.environ.get('SMTP_FROM_EMAIL')
+SMTP_USE_TLS = os.environ.get('SMTP_USE_TLS', 'true').lower() == 'true'
+
+EMAIL_NOTIFICATIONS_ENABLED = bool(SMTP_HOST and SMTP_FROM_EMAIL)
 
 # Create the main app without a prefix
 app = FastAPI()
@@ -48,6 +61,7 @@ class ActivitySelection(BaseModel):
     activity_response: Optional[str] = None
     client_hint: Optional[str] = None
     recipient_name: Optional[str] = None
+    host_email: Optional[EmailStr] = None
     timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
@@ -58,6 +72,7 @@ class ActivitySelectionCreate(BaseModel):
     activity_response: Optional[str] = None
     client_hint: Optional[str] = None
     recipient_name: Optional[str] = None
+    host_email: Optional[EmailStr] = None
 
 # Add your routes to the router instead of directly to app
 @api_router.get("/")
@@ -96,6 +111,7 @@ async def create_activity_selection(input: ActivitySelectionCreate):
     doc['timestamp'] = doc['timestamp'].isoformat()
 
     await db.activity_selections.insert_one(doc)
+    asyncio.create_task(send_selection_notification(selection_obj))
     return selection_obj
 
 
@@ -108,6 +124,51 @@ async def list_activity_selections():
             selection['timestamp'] = datetime.fromisoformat(selection['timestamp'])
 
     return selections
+
+
+async def send_selection_notification(selection: ActivitySelection):
+    if not EMAIL_NOTIFICATIONS_ENABLED or not selection.host_email:
+        return
+
+    try:
+        await asyncio.to_thread(_send_email_sync, selection)
+    except Exception as exc:
+        logger.exception("Failed to send notification email: %s", exc)
+
+
+def _send_email_sync(selection: ActivitySelection):
+    recipient_display = selection.recipient_name or "Your Valentine"
+    activity_name = selection.activity_title
+    timestamp_display = selection.timestamp.strftime('%Y-%m-%d %H:%M:%S %Z')
+
+    subject = f"{recipient_display} picked {activity_name}! 💌"
+    body_lines = [
+        f"Hi there!",
+        "",
+        f"{recipient_display} just chose \"{activity_name}\" ({selection.activity_emoji}) for your Valentine's adventure.",
+        "",
+        f"Message shown to them:",
+        f"{selection.activity_response or 'No custom message provided.'}",
+        "",
+        f"Recorded at: {timestamp_display}",
+        "",
+        "Check the Activity Log for more details.",
+        "",
+        "With love,",
+        "Your Valentine App 💞",
+    ]
+    message = EmailMessage()
+    message['Subject'] = subject
+    message['From'] = SMTP_FROM_EMAIL
+    message['To'] = selection.host_email
+    message.set_content("\n".join(body_lines))
+
+    with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=30) as server:
+        if SMTP_USE_TLS:
+            server.starttls()
+        if SMTP_USERNAME and SMTP_PASSWORD:
+            server.login(SMTP_USERNAME, SMTP_PASSWORD)
+        server.send_message(message)
 
 # Include the router in the main app
 app.include_router(api_router)

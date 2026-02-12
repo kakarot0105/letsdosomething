@@ -11,6 +11,7 @@ const CONFETTI_CONFIG = {
 };
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:8000/api";
+const HOST_EMAIL_STORAGE_KEY = "valentine-host-email";
 
 const getRecipientNameFromUrl = () => {
   if (typeof window === "undefined") {
@@ -19,6 +20,31 @@ const getRecipientNameFromUrl = () => {
   const params = new URLSearchParams(window.location.search);
   const raw = params.get("name") || params.get("recipient");
   return raw ? raw.trim() : null;
+};
+
+const decodeEmailFromLink = (value) => {
+  if (!value) {
+    return null;
+  }
+  try {
+    if (typeof window !== "undefined" && window.atob) {
+      return window.atob(value);
+    }
+    return null;
+  } catch (error) {
+    console.warn("Failed to decode host email from link", error);
+    return null;
+  }
+};
+
+const encodeEmailForLink = (value) => {
+  if (!value) {
+    return "";
+  }
+  if (typeof window !== "undefined" && window.btoa) {
+    return window.btoa(value);
+  }
+  return value;
 };
 
 const getClientFingerprint = () => {
@@ -47,19 +73,97 @@ const getHostModeFromUrl = () => {
   return ["1", "true", "yes"].includes(raw.toLowerCase());
 };
 
-const ValentineExperience = ({ recipientName, isHostView }) => {
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [showActivitySelect, setShowActivitySelect] = useState(false);
-  const [selectedActivity, setSelectedActivity] = useState(null);
-  const [noButtonPosition, setNoButtonPosition] = useState({ x: 100, y: 0 });
-  const [attempts, setAttempts] = useState(0);
+const getHostEmailFromUrl = () => {
+  if (typeof window === "undefined") {
+    return null;
+  }
+  const params = new URLSearchParams(window.location.search);
+  const encoded = params.get("notify") || params.get("hostEmail");
+  return decodeEmailFromLink(encoded);
+};
+
+const useActivityLog = (isEnabled) => {
   const [activityLog, setActivityLog] = useState([]);
   const [isActivityLogVisible, setIsActivityLogVisible] = useState(false);
   const [isLogLoading, setIsLogLoading] = useState(false);
   const [logError, setLogError] = useState(null);
   const [isPersistingSelection, setIsPersistingSelection] = useState(false);
   const [lastSyncedAt, setLastSyncedAt] = useState(null);
+
+  const fetchActivityLog = useCallback(async () => {
+    if (!isEnabled || typeof fetch !== "function") {
+      return;
+    }
+
+    try {
+      setIsLogLoading(true);
+      setLogError(null);
+
+      const response = await fetch(`${API_BASE_URL}/activity`);
+      if (!response.ok) {
+        throw new Error("Unable to load activity log");
+      }
+
+      const data = await response.json();
+      setActivityLog(data);
+      setLastSyncedAt(new Date());
+    } catch (error) {
+      setLogError(
+        error.message || "Failed to load selections. Is the backend running?"
+      );
+    } finally {
+      setIsLogLoading(false);
+    }
+  }, [isEnabled]);
+
+  useEffect(() => {
+    if (!isEnabled) {
+      return undefined;
+    }
+
+    fetchActivityLog();
+    const interval = setInterval(fetchActivityLog, 15000);
+    return () => clearInterval(interval);
+  }, [isEnabled, fetchActivityLog]);
+
+  const toggleActivityLog = () => {
+    setIsActivityLogVisible((prev) => !prev);
+  };
+
+  return {
+    activityLog,
+    isActivityLogVisible,
+    isLogLoading,
+    logError,
+    isPersistingSelection,
+    setIsPersistingSelection,
+    lastSyncedAt,
+    fetchActivityLog,
+    toggleActivityLog,
+    setLogError
+  };
+};
+
+const ValentineExperience = ({ recipientName, hostEmail, isHostView }) => {
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [showActivitySelect, setShowActivitySelect] = useState(false);
+  const [selectedActivity, setSelectedActivity] = useState(null);
+  const [noButtonPosition, setNoButtonPosition] = useState({ x: 100, y: 0 });
+  const [attempts, setAttempts] = useState(0);
   const [clientFingerprint] = useState(getClientFingerprint);
+
+  const {
+    activityLog,
+    isActivityLogVisible,
+    isLogLoading,
+    logError,
+    isPersistingSelection,
+    setIsPersistingSelection,
+    lastSyncedAt,
+    fetchActivityLog,
+    toggleActivityLog,
+    setLogError
+  } = useActivityLog(isHostView);
 
   const displayName = recipientName || "sweetheart";
 
@@ -108,30 +212,6 @@ const ValentineExperience = ({ recipientName, isHostView }) => {
     }
   ];
 
-  const fetchActivityLog = useCallback(async () => {
-    if (typeof fetch !== "function") {
-      return;
-    }
-
-    try {
-      setIsLogLoading(true);
-      setLogError(null);
-
-      const response = await fetch(`${API_BASE_URL}/activity`);
-      if (!response.ok) {
-        throw new Error("Unable to load activity log");
-      }
-
-      const data = await response.json();
-      setActivityLog(data);
-      setLastSyncedAt(new Date());
-    } catch (error) {
-      setLogError(error.message || "Failed to load selections. Is the backend running?");
-    } finally {
-      setIsLogLoading(false);
-    }
-  }, []);
-
   const persistActivitySelection = useCallback(
     async (activity) => {
       if (typeof fetch !== "function") {
@@ -154,7 +234,8 @@ const ValentineExperience = ({ recipientName, isHostView }) => {
             activity_emoji: activity.emoji,
             activity_response: activity.response,
             client_hint: `${clientFingerprint}@${locationHint}`,
-            recipient_name: recipientName
+            recipient_name: recipientName,
+            host_email: hostEmail
           })
         });
 
@@ -170,18 +251,8 @@ const ValentineExperience = ({ recipientName, isHostView }) => {
         setIsPersistingSelection(false);
       }
     },
-    [clientFingerprint, fetchActivityLog, recipientName]
+    [clientFingerprint, fetchActivityLog, hostEmail, recipientName, setIsPersistingSelection, setLogError]
   );
-
-  useEffect(() => {
-    fetchActivityLog();
-    const interval = setInterval(fetchActivityLog, 15000);
-    return () => clearInterval(interval);
-  }, [fetchActivityLog]);
-
-  const toggleActivityLog = () => {
-    setIsActivityLogVisible((prev) => !prev);
-  };
 
   const handleYesClick = () => {
     setShowSuccess(true);
@@ -541,9 +612,27 @@ const ValentineExperience = ({ recipientName, isHostView }) => {
 
 const ShareLinkSetup = ({ isHostView }) => {
   const [nameInput, setNameInput] = useState("");
+  const [hostEmailInput, setHostEmailInput] = useState(() => {
+    if (typeof window === "undefined") {
+      return "";
+    }
+    return window.localStorage.getItem(HOST_EMAIL_STORAGE_KEY) || "";
+  });
   const [generatedLink, setGeneratedLink] = useState("");
+  const [hostPreviewLink, setHostPreviewLink] = useState("");
   const [copyStatus, setCopyStatus] = useState("idle");
+  const [hostCopyStatus, setHostCopyStatus] = useState("idle");
   const [errorMessage, setErrorMessage] = useState("");
+  const {
+    activityLog,
+    isActivityLogVisible,
+    isLogLoading,
+    logError,
+    isPersistingSelection,
+    lastSyncedAt,
+    fetchActivityLog,
+    toggleActivityLog
+  } = useActivityLog(isHostView);
 
   const baseUrl =
     typeof window !== "undefined"
@@ -551,6 +640,10 @@ const ShareLinkSetup = ({ isHostView }) => {
       : "";
 
   const currentName = nameInput.trim();
+  const currentEmail = hostEmailInput.trim();
+
+  const isValidEmail = (value) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.toLowerCase());
 
   const handleGenerateLink = (event) => {
     event.preventDefault();
@@ -559,11 +652,29 @@ const ShareLinkSetup = ({ isHostView }) => {
       setGeneratedLink("");
       return;
     }
+    if (!currentEmail || !isValidEmail(currentEmail)) {
+      setErrorMessage("Add a valid email so we can send you the response.");
+      setGeneratedLink("");
+      return;
+    }
 
-    const personalizedLink = `${baseUrl}?name=${encodeURIComponent(currentName)}`;
+    const encodedEmail = encodeEmailForLink(currentEmail);
+    const params = new URLSearchParams({
+      name: currentName,
+      notify: encodedEmail
+    });
+    const personalizedLink = `${baseUrl}?${params.toString()}`;
+    const previewLink = `${personalizedLink}&host=1`;
+
     setGeneratedLink(personalizedLink);
+    setHostPreviewLink(previewLink);
     setCopyStatus("idle");
+    setHostCopyStatus("idle");
     setErrorMessage("");
+
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(HOST_EMAIL_STORAGE_KEY, currentEmail);
+    }
   };
 
   const handleCopyLink = async () => {
@@ -578,9 +689,22 @@ const ShareLinkSetup = ({ isHostView }) => {
     }
   };
 
+  const handleCopyHostLink = async () => {
+    if (!hostPreviewLink) return;
+
+    try {
+      await navigator.clipboard.writeText(hostPreviewLink);
+      setHostCopyStatus("copied");
+    } catch (error) {
+      console.error("Failed to copy host link", error);
+      setHostCopyStatus("failed");
+    }
+  };
+
   const handlePreviewLink = () => {
-    if (!generatedLink) return;
-    window.open(generatedLink, "_blank", "noopener,noreferrer");
+    const target = hostPreviewLink || generatedLink;
+    if (!target) return;
+    window.open(target, "_blank", "noopener,noreferrer");
   };
 
   return (
@@ -639,6 +763,14 @@ const ShareLinkSetup = ({ isHostView }) => {
             value={nameInput}
             onChange={(event) => setNameInput(event.target.value)}
             data-testid="share-name-input"
+          />
+          <input
+            type="email"
+            className="w-full rounded-full border-2 border-valentine-primary/40 px-6 py-3 text-lg font-body shadow-inner focus:outline-none focus:ring-4 focus:ring-valentine-primary/30"
+            placeholder="Your email (we'll send responses here)"
+            value={hostEmailInput}
+            onChange={(event) => setHostEmailInput(event.target.value)}
+            data-testid="share-email-input"
           />
           <button
             type="submit"
@@ -703,19 +835,47 @@ const ShareLinkSetup = ({ isHostView }) => {
               >
                 Create Another
               </button>
+              <button
+                type="button"
+                onClick={handleCopyHostLink}
+                className="rounded-full border border-valentine-primary/40 px-6 py-3 font-semibold text-valentine-text hover:bg-white"
+                data-testid="share-copy-host-button"
+              >
+                {hostCopyStatus === "copied" ? "Host Link Copied" : "Copy Host Link"}
+              </button>
             </div>
             <p className="mt-4 text-sm text-valentine-text/80">
-              Anyone opening this link will see their name in the proposal
-              screen, and their choice will appear in your Activity Log.
+              Anyone opening the first link will see their name in the proposal
+              screen, and their choice will appear in your Activity Log. We&apos;ll
+              also email the results to {currentEmail || "your inbox"} as soon as
+              they pick something.
             </p>
             {copyStatus === "failed" && (
               <p className="mt-2 text-xs text-red-600">
                 Copy failed—please select the link above and copy it manually.
               </p>
             )}
+            {hostCopyStatus === "failed" && (
+              <p className="mt-2 text-xs text-red-600">
+                Host link copy failed—select the host link button again or copy manually.
+              </p>
+            )}
           </div>
         )}
       </div>
+
+      {isHostView && (
+        <SelectionLogViewer
+          isVisible={isActivityLogVisible}
+          onToggle={toggleActivityLog}
+          onRefresh={fetchActivityLog}
+          selections={activityLog}
+          isLoading={isLogLoading}
+          isPersistingSelection={isPersistingSelection}
+          error={logError}
+          lastSyncedAt={lastSyncedAt}
+        />
+      )}
     </div>
   );
 };
@@ -723,6 +883,7 @@ const ShareLinkSetup = ({ isHostView }) => {
 const ValentineProposal = () => {
   const [recipientName] = useState(getRecipientNameFromUrl);
   const [hostOverride] = useState(getHostModeFromUrl);
+  const [hostEmail] = useState(getHostEmailFromUrl);
   const isHostView = !recipientName || hostOverride;
 
   if (!recipientName) {
@@ -732,6 +893,7 @@ const ValentineProposal = () => {
   return (
     <ValentineExperience
       recipientName={recipientName}
+      hostEmail={hostEmail}
       isHostView={isHostView}
     />
   );
